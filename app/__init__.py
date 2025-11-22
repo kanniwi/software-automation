@@ -1,7 +1,50 @@
 from flask import Flask
+import os
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from flask_login import LoginManager
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 def create_app():
     app = Flask(__name__)
+
+    # Basic config
+    app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key")
+
+    # Database setup: use DATABASE_URL env var or fallback to sqlite file
+    DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///dev.db")
+    if isinstance(DATABASE_URL, str) and DATABASE_URL.startswith("postgres://"):
+        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+    engine = create_engine(DATABASE_URL, future=True, pool_pre_ping=True)
+    SessionLocal = sessionmaker(bind=engine, expire_on_commit=False, future=True)
+    app.db_engine = engine
+    app.db_session = SessionLocal
+
+    # Flask-Login setup
+    login_manager = LoginManager()
+    login_manager.init_app(app)
+
+    @login_manager.user_loader
+    def load_user(user_id: str):
+        try:
+            from app.models import User
+            session = SessionLocal()
+            user = session.get(User, int(user_id))
+            session.close()
+            return user
+        except Exception:
+            return None
+
+    # Import models and create tables in development (convenience)
+    try:
+        from app import models
+        models.Base.metadata.create_all(bind=engine)
+    except Exception:
+        pass
 
     # Подключаем роуты
     from app.routes import main

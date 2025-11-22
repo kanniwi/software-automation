@@ -78,8 +78,17 @@
         <p>Добро пожаловать! Здесь вы можете узнать о предстоящих соревнованиях, просмотреть статистику и многое другое.</p>
 
         <!-- Кнопки друг под другом -->
-        <a href="#" class="btn user">Перейти к просмотру</a>
-        <a href="#" class="btn admin">Вход для администратора</a>
+        {% if current_user.is_authenticated %}
+            <form method="post" action="{{ url_for('main.logout') }}" style="display:inline">
+                <button type="submit" class="btn user">Выйти</button>
+            </form>
+            {% if current_user.type.name == 'ADMIN' %}
+                <a href="{{ url_for('main.admin') }}" class="btn admin">Админ</a>
+            {% endif %}
+        {% else %}
+            <a href="{{ url_for('main.register') }}" class="btn user">Регистрация</a>
+            <a href="{{ url_for('main.login') }}" class="btn admin">Вход</a>
+        {% endif %}
     </div>
 </body>
 </html>

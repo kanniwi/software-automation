@@ -1,14 +1,51 @@
 from typing import List, Optional
-import datetime as dt  
-from sqlalchemy import String, Integer, ForeignKey, Float, Date, Time
+import datetime as dt
+from enum import Enum
+from sqlalchemy import String, Integer, ForeignKey, Float, Date, Time, Enum as SAEnum
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+
+# auth helpers
+from flask_login import UserMixin
+from werkzeug.security import generate_password_hash, check_password_hash
 
 
 class Base(DeclarativeBase):
     """Базовый класс для всех моделей"""
     pass
 
+class UserType(Enum):
+    ADMIN = "admin"
+    PEASANT = "peasant"
 
+class User(UserMixin, Base):
+    __tablename__ = "users"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    login: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
+    password: Mapped[str] = mapped_column(String(255), nullable=False)
+    # name the enum in the DB so migrations can reference it consistently
+    type: Mapped[UserType] = mapped_column(
+        SAEnum(UserType, name="user_type"),
+        nullable=False,
+        default=UserType.PEASANT
+    )
+
+    def set_password(self, raw: str) -> None:
+        self.password = generate_password_hash(raw)
+
+    def check_password(self, raw: str) -> bool:
+        if not self.password:
+            return False
+        return check_password_hash(self.password, raw)
+
+    @property
+    def is_admin(self) -> bool:
+        return self.type == UserType.ADMIN
+
+    def __repr__(self) -> str:
+        return f"<User id={self.id} login={self.login} type={self.type}>"
+
+    
 class Owner(Base):
     __tablename__ = "owners"
 
