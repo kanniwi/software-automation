@@ -1,8 +1,0 @@
-alembic
-dotenv
-flask
-flask_login
-gunicorn
-psycopg2-binary
-sqlalchemy
-Werkzeug
