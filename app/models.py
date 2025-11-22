@@ -1,13 +1,46 @@
 from typing import List, Optional
 import datetime as dt  
-from sqlalchemy import String, Integer, ForeignKey, Float, Date, Time
+from sqlalchemy import String, Integer, ForeignKey, Float, Date, Time, Enum as SAEnum
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from enum import Enum
+
+# Flask-Login and password helpers
+from flask_login import UserMixin
+from werkzeug.security import generate_password_hash, check_password_hash
 
 
 class Base(DeclarativeBase):
     """Базовый класс для всех моделей"""
     pass
 
+class UserType(Enum):
+    ADMIN = 0
+    PEASANT = 1
+
+class User(Base):
+    __tablename__ = "users"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    login: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
+    password: Mapped[str] = mapped_column(String(255))
+    type: Mapped[UserType] = mapped_column(
+        SAEnum(UserType),
+        nullable=False,
+        default=UserType.PEASANT
+    )
+
+    def set_password(self, raw_password: str) -> None:
+        """Hash and store the password."""
+        self.password = generate_password_hash(raw_password)
+
+    def check_password(self, raw_password: str) -> bool:
+        """Return True if password matches the stored hash."""
+        if not self.password:
+            return False
+        return check_password_hash(self.password, raw_password)
+
+    def __repr__(self) -> str:  # pragma: no cover - small convenience
+        return f"<User id={self.id} login={self.login} type={self.type}>"
 
 class Owner(Base):
     __tablename__ = "owners"
