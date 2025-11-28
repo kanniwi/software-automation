@@ -1,10 +1,12 @@
+name: "software-automation"
+
 services:
   postgres-service:
     image: postgres:latest
     environment:
-      POSTGRES_USER: flask_app
-      POSTGRES_PASSWORD: flask_pass
-      POSTGRES_DB: flask_app_database
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - ./db/initdb:/docker-entrypoint-initdb.d:ro
   
@@ -15,8 +17,8 @@ services:
     ports:
       - "5000:5000"
     environment:
-      FLASK_APP: app
+      FLASK_APP: ${FLASK_APP}
       # connect to postgres service by service name (not localhost)
-      DATABASE_URL: postgresql://flask_app:flask_pass@postgres-service:5432/flask_app_database
+      DATABASE_URL: ${DATABASE_URL}
     depends_on:
       - postgres-service

@@ -8,14 +8,23 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-def create_app():
+class EnvConfig:
+    SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-key")
+    DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///dev.db")
+
+def create_app(config_object=None):
     app = Flask(__name__)
+    
+    if config_object:
+        app.config.from_object(config_object)
+    else:
+        app.config.from_object(EnvConfig)
 
     # Basic config
-    app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key")
+    app.secret_key = app.config["SECRET_KEY"]
 
     # Database setup: use DATABASE_URL env var or fallback to sqlite file
-    DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///dev.db")
+    DATABASE_URL = app.config.get("DATABASE_URL", "sqlite:///dev.db")
     if isinstance(DATABASE_URL, str) and DATABASE_URL.startswith("postgres://"):
         DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
