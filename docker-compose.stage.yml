@@ -1,0 +1,32 @@
+version: '3.8'
+name: "software-automation-stage"
+
+services:
+  postgres-stage:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: stage_user
+      POSTGRES_PASSWORD: stage_password_123
+      POSTGRES_DB: stage_db
+    volumes:
+      - postgres_stage_data:/var/lib/postgresql/data
+    networks:
+      - stage_network
+
+  application-stage:
+    image: kanniwi/software-automation:latest # ОБРАТИТЕ ВНИМАНИЕ: используется образ из Hub!
+    ports:
+      - "5001:5000" # Запускаем на другом порту
+    environment:
+      FLASK_APP: app/app.py
+      DATABASE_URL: postgresql://stage_user:stage_password_123@postgres-stage:5432/stage_db
+    depends_on:
+      - postgres-stage
+    networks:
+      - stage_network
+
+volumes:
+  postgres_stage_data:
+
+networks:
+  stage_network:
