@@ -5,7 +5,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from app.models import User, UserType
 
 main = Blueprint('main', __name__)
-# pull request
+# pull requestttt
 
 
 @main.route('/')
