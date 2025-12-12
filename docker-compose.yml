@@ -1,0 +1,24 @@
+name: "software-automation"
+
+services:
+  postgres-service:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - ./db/initdb:/docker-entrypoint-initdb.d:ro
+  
+  application:
+    build:
+      context: .
+      dockerfile: app/Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      FLASK_APP: ${FLASK_APP}
+      # connect to postgres service by service name (not localhost)
+      DATABASE_URL: ${DATABASE_URL}
+    depends_on:
+      - postgres-service

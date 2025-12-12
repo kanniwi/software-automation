@@ -1,0 +1,25 @@
+services:
+  teamcity-server:
+    image: jetbrains/teamcity-server:2024.11.2
+    container_name: teamcity-server
+    ports:
+      - "8111:8111"
+    volumes:
+      - ./teamcity/data:/data/teamcity_server/datadir
+      - ./teamcity/logs:/opt/teamcity/logs
+    environment:
+      - TEAMCITY_SERVER_MEM_OPTS=-Xmx2g -XX:ReservedCodeCacheSize=1g
+    restart: unless-stopped
+
+  teamcity-agent:
+    image: jetbrains/teamcity-agent:2024.11.2
+    container_name: teamcity-agent
+    depends_on:
+      - teamcity-server
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock  # Даём доступ к Docker
+      - ./teamcity/agent/conf:/data/teamcity_agent/conf
+    environment:
+      - SERVER_URL=http://teamcity-server:8111
+      # Токен добавим после первого запуска сервера
+    restart: unless-stopped

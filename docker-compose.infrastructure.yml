@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  # TeamCity Server
+  teamcity-server:
+    image: jetbrains/teamcity-server:2024.07  # СТАБИЛЬНАЯ версия
+    ports:
+      - "8111:8111"
+    volumes:
+      - ./teamcity-server/data:/data/teamcity_server/datadir
+      - ./teamcity-server/logs:/opt/teamcity/logs
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      TEAMCITY_SERVER_MEM_OPTS: "-Xmx2g"
+  
+  # TeamCity Agent
+  teamcity-agent:
+    image: jetbrains/teamcity-agent:2024.07  # ВЕРСИЯ ДОЛЖНА СОВПАДАТЬ!
+    environment:
+      SERVER_URL: "http://teamcity-server:8111"
+      AGENT_NAME: "main-agent"  # Простое имя
+    user: root
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock  # ВАЖНО для доступа к Docker
+      - ./agent-work:/opt/buildagent/work
+    depends_on:
+      - teamcity-server

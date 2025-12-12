@@ -1,0 +1,8 @@
+alembic
+dotenv
+psycopg2-binary
+flask
+flask-login
+gunicorn
+werkzeug
+sqlalchemy
