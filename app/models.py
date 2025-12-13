@@ -23,6 +23,8 @@ class User(UserMixin, Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     login: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String(255), nullable=False)
+    
+    description: Mapped[str] = mapped_column(String(255), nullable=False)
     # name the enum in the DB so migrations can reference it consistently
     type: Mapped[UserType] = mapped_column(
         SAEnum(UserType, name="user_type"),
