@@ -92,16 +92,8 @@ def admin():
 
 @main.route('/api/bug/divide')
 def bug_divide():
-    """Намеренная ошибка: деление на ноль"""
     a = 10
-    b = 0  # ОШИБКА!
-    result = a / b  # ZeroDivisionError
+    b = 1 
+    result = a / b 
     return {'result': result}
 
-@main.route('/api/bug/nosql')
-def bug_nosql():
-    """Намеренная уязвимость: SQL-инъекция (простая имитация)"""
-    user_input = request.args.get('query', '')
-    # Опасный код (упрощенный пример)
-    query = f"SELECT * FROM users WHERE login = '{user_input}'"
-    return {'query': query, 'message': 'Vulnerable endpoint'}
