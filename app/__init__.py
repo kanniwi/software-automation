@@ -12,8 +12,19 @@ class EnvConfig:
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-key")
     DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///dev.db")
 
-def create_app(config_object=None):
+def create_app(config_object=None, testing=False):
     app = Flask(__name__)
+    
+    if testing:
+        app.config.from_object({
+            'TESTING': True,
+            'SECRET_KEY': 'test-secret-key',
+            'DATABASE_URL': 'sqlite:///:memory:'  # Тестовая БД
+        })
+    elif config_object:
+        app.config.from_object(config_object)
+    else:
+        app.config.from_object(EnvConfig)
     
     if config_object:
         app.config.from_object(config_object)
