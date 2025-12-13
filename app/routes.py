@@ -88,3 +88,20 @@ def admin():
     if not current_user.is_authenticated or not getattr(current_user, 'type', None) == UserType.ADMIN:
         abort(403)
     return render_template('admin.html')
+
+
+@main.route('/api/bug/divide')
+def bug_divide():
+    """Намеренная ошибка: деление на ноль"""
+    a = 10
+    b = 0  # ОШИБКА!
+    result = a / b  # ZeroDivisionError
+    return {'result': result}
+
+@main.route('/api/bug/nosql')
+def bug_nosql():
+    """Намеренная уязвимость: SQL-инъекция (простая имитация)"""
+    user_input = request.args.get('query', '')
+    # Опасный код (упрощенный пример)
+    query = f"SELECT * FROM users WHERE login = '{user_input}'"
+    return {'query': query, 'message': 'Vulnerable endpoint'}
